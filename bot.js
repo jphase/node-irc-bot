@@ -43,8 +43,10 @@ bot.addListener( 'registered', function ( message ) {
 
 // Error handler
 bot.addListener( 'error', function ( message ) {
-	console.error( 'ERROR: ');
-	console.error( message );
+	if ( config.log ) {
+		console.log( 'BOT ERROR: ' );
+		console.log( message );
+	}
 });
 
 // Join events
