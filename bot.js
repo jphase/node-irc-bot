@@ -507,6 +507,34 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					});
 					break;
 
+				// Spotify command
+				case 'spotify':
+					if ( config.debug ) console.log( '[Spotify search] for: ' + str );
+					google( str + ' site:open.spotify.com', function ( err, next, links ) {
+						if ( err && config.debug ) console.error( err );
+						if ( config.debug ) console.log( links );
+						// Show the search results
+						if ( links.length ) {
+							bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						}
+					});
+					break;
+
+				// Spotify command
+				case 'spotifyuri':
+					if ( config.debug ) console.log( '[Spotify URI search] for: ' + str );
+					google( str + ' site:open.spotify.com', function ( err, next, links ) {
+						if ( err && config.debug ) console.error( err );
+						if ( config.debug ) console.log( links );
+						// Show the search results
+						if ( links.length ) {
+							var link = links[0].link.split('/');
+							link = 'spotify:track:' + link[ link.length - 1 ];
+							bot.say( to, who ? who + ': ' + link : from + ': ' + link );
+						}
+					});
+					break;
+
 				// wpseek.com search
 				case 'wps':
 				case 'wpseek':
