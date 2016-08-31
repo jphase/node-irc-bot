@@ -9,6 +9,7 @@ module.exports = {
 	name: 'your-bot-nick',          // The nickname of your bot
 	pass: 'your-bots-password',     // The password of your bot
 	email: 'your-bots@email.com',   // The email address of your bot
+	realName: 'Your Bot',           // The real name of your bot
 	floodMessages: 3,               // How many messages trigger the flood control (beta - doesn't do anything yet)
 	floodTimeout: 3000,             // The timeout between messages. This combined with floodMessages will determine the flood threshold
 	autoRejoin: true,				// Optional boolean to toggle auto rejoin on kick

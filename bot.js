@@ -19,7 +19,7 @@ var flood = [];
 var bot = new irc.Client( config.server, config.name, {
 	// channels: config.channels,
 	// localAddress: config.localAddress,
-	realName: '##wordpress IRC Bot',
+	realName: config.realName,
 	autoRejoin: true
 });
 
@@ -507,6 +507,19 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					});
 					break;
 
+				// Soundcloud command
+				case 'soundcloud':
+					if ( config.debug ) console.log( '[SoundCloud search] for: ' + str );
+					google( str + ' site:soundcloud.com', function ( err, next, links ) {
+						if ( err && config.debug ) console.error( err );
+						if ( config.debug ) console.log( links );
+						// Show the search results
+						if ( links.length ) {
+							bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						}
+					});
+					break;
+
 				// Spotify command
 				case 'spotify':
 					if ( config.debug ) console.log( '[Spotify search] for: ' + str );
@@ -788,9 +801,11 @@ bot.addListener( 'message', function( from, to, text, message ) {
 
 				// Bye command
 				case 'bye':
-					var answers = [ 'https://janeaustenrunsmylife.files.wordpress.com/2014/02/jezebel_buh-bye_wave-goodbye_brilliantsunrise-pb.gif', 'http://p.fod4.com/p/media/15622856b6/YTKd82zSAuXVKbCHrGj5_Star%20Trek%20Patrick%20Stewart.gif', 'http://25.media.tumblr.com/tumblr_lt3cwzIDoU1qipyqco1_500.gif', 'http://media3.popsugar-assets.com/files/thumbor/Kq9kVeZDktjN26PTW3rBFPtYX8A/fit-in/2048xorig/filters:format_auto.!!.:strip_icc.!!./2014/11/06/317/n/1922283/728c12978f2d92be_tumblr_mwji67R3w71sj1ltqo1_500/i/When-Woody-says-goodbye-you-SOBBED.gif', 'http://p.fod4.com/p/media/15622856b6/Qcz8AXFORCS4NkpouQiT_Clarissa.gif', 'http://lovelace-media.imgix.net/uploads/615/8cf94510-9dba-0133-a027-0e7c926a42af.gif', 'http://i.imgur.com/OZNYKGY.gif' ];
+					var answers = [ 'http://xn--rh8hj8g.ws/bye-jezebel.gif', 'http://xn--rh8hj8g.ws/bye-jezebel.gif', 'http://xn--rh8hj8g.ws/bye-bitch.gif', 'http://xn--rh8hj8g.ws/bye-woody.gif', 'http://xn--rh8hj8g.ws/bye-clarissa.gif', 'http://xn--rh8hj8g.ws/bye-harrypotter.gif', 'http://xn--rh8hj8g.ws/bye-random.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
+					// This allows the user to add a message on top of
+					// msg = ( str ? str + ' ' : '' ) + msg;
 					bot.say( message.args[0], msg );
 					break;
 
@@ -826,6 +841,15 @@ bot.addListener( 'message', function( from, to, text, message ) {
 				case 'say':
 					bot.say( message.args[0], who ? who + ': ' + str : str );
 					break;
+
+				// WTF command
+				case 'wtf':
+					var answers = [ 'http://xn--rh8hj8g.ws/wtf-baby.png' ];
+					var answer = ( str ? str + ' ' : '' ) + answers[ Math.floor( Math.random() * answers.length ) ];
+					var msg = who ? who + ': ' + answer : from + ': ' + answer;
+					bot.say( message.args[0], msg );
+					break;
+
 			}
 		}
 	}
