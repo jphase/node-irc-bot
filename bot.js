@@ -662,6 +662,69 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					bot.say( message.args[0], msg );
 					break;
 
+				// Bitcoin command
+				case 'bitcoin':
+					if ( config.debug ) console.log( '[Bitcoin Exchange Rate]' );
+					// Check if they want a specific exchange rate
+					if ( str.indexOf('.bitcoin:') == 0 ) {
+						var currency = str.split(' ');
+						currency = currency[0].split(':');
+						currency = currency[1].toUpperCase();
+					} else {
+						var currency = 'USD';
+					}
+					// Grab the blockchain information for the current currency type
+					request( 'https://blockchain.info/ticker', function( error, response, body ) {
+						if ( ! error) {
+							body = JSON.parse( body );
+							if ( body.hasOwnProperty( currency ) ) {
+								body = body[ currency ];
+								var msg = 'Current ' + currency + ' Bitcoin Value: ' + body.symbol + body.last + '. [Buy @ ' + body.symbol + body.buy + ' and Sell @ ' + body.symbol + body.sell + ']';
+							} else {
+								var msg = 'Unable to read blockchain information for the "' + currency + '" currency type. Please try again later :(';
+							}
+							bot.say( message.args[0], who ? who + ': ' + msg : from + ': ' + msg );
+						}
+					});
+					break;
+
+				// Math command
+				case 'math':
+					if ( config.debug ) console.log( '[Math Command]' );
+					// Get the endpoint
+					var endpoint = 'http://api.mathjs.org/v1/?expr=' + encodeURIComponent( str );
+					// Grab the blockchain information for the current currency type
+					request( endpoint, function( error, response, body ) {
+						if ( ! error) {
+							var msg = body;
+							bot.say( message.args[0], who ? who + ': ' + msg : from + ': ' + msg );
+						}
+					});
+					break;
+
+				// // Weather command
+				// case 'weather':
+				// 	if ( config.hasOwnProperty('openweathermap_api_key') ) {
+				// 		if ( config.debug ) console.log( '[Weather Command]' );
+				// 		// Set the API endpoint
+				// 		var endpoint = 'http://api.openweathermap.org/data/2.5/weather?q=London&APPID=' + config.openweathermap_api_key;
+				// 		// Grab the blockchain information for the current currency type
+				// 		request( endpoint, function( error, response, body ) {
+				// 			if ( ! error) {
+				// 				body = JSON.parse( body );
+				// 				if ( body.hasOwnProperty('name') ) {
+				// 					var wind = body.wind.speed;
+				// 					var msg = 'Current weather for ' + body.name + ': '
+				// 					var msg = 'Current ' + currency + ' Bitcoin Value: ' + body.symbol + body.last + '. [Buy @ ' + body.symbol + body.buy + ' and Sell @ ' + body.symbol + body.sell + ']';
+				// 				} else {
+				// 					var msg = 'Unable to read blockchain information for the "' + currency + '" currency type. Please try again later :(';
+				// 				}
+				// 				bot.say( message.args[0], who ? who + ': ' + msg : from + ': ' + msg );
+				// 			}
+				// 		});
+				// 	}
+				// 	break;
+
 				// Count command
 				case 'count':
 					if ( config.debug ) console.log( '[WordPress Count]' );
@@ -793,7 +856,7 @@ bot.addListener( 'message', function( from, to, text, message ) {
 
 				// Hi command
 				case 'hi':
-					var answers = [ 'https://s-media-cache-ak0.pinimg.com/originals/7d/8c/8d/7d8c8d1fd7b01d033dcbad20ca6053a5.jpg', 'https://media.giphy.com/media/8vc2rMUDjhy6Y/giphy.gif', 'https://media.giphy.com/media/JGKwzgpKXVYaY/giphy.gif', 'http://p.fod4.com/p/media/15622856b6/YTKd82zSAuXVKbCHrGj5_Star%20Trek%20Patrick%20Stewart.gif', 'http://www.hellocreative.com/images/Hello-Funny.gif', 'https://media.giphy.com/media/rcE4NmvORkx9u/giphy.gif', 'http://p.fod4.com/p/media/15622856b6/blJcJsQKQjGARx7rLGQg_Whale%20Hello.gif' ];
+					var answers = [ 'https://s-media-cache-ak0.pinimg.com/originals/7d/8c/8d/7d8c8d1fd7b01d033dcbad20ca6053a5.jpg', 'https://media.giphy.com/media/8vc2rMUDjhy6Y/giphy.gif', 'https://media.giphy.com/media/JGKwzgpKXVYaY/giphy.gif', 'http://xn--rh8hj8g.ws/hi-picard.gif', 'http://www.hellocreative.com/images/Hello-Funny.gif', 'https://media.giphy.com/media/rcE4NmvORkx9u/giphy.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.say( message.args[0], msg );
@@ -851,6 +914,26 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					break;
 
 			}
+		} else {
+			// React to parts of their string if it contains certain text
+			var msg = '';
+			var prefix = who ? who + ': ' : '';
+			if ( text.indexOf(':cry:') > -1 ) {
+				msg += msg.length ? ' (╯︵╰,)' : '(╯︵╰,)';
+			}
+			if ( text.indexOf(':party:') > -1 || text.indexOf(':dance:') > -1 || text.indexOf(':boogie:') > -1 ) {
+				msg += msg.length ? ' ┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓' : '┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓';
+			}
+			if ( text.indexOf(':finger:') > -1 || text.indexOf(':fuckyou:') > -1 || text.indexOf(':fu:') > -1 ) {
+				msg += msg.length ? ' ╭∩╮(ಠ_ಠ)╭∩╮' : '╭∩╮(ಠ_ಠ)╭∩╮';
+			}
+			if ( text.indexOf(':poop:') > -1 || text.indexOf(':crap:') > -1 || text.indexOf(':shit:') > -1 ) {
+				msg += msg.length ? ' 💩💩' : '💩💩';
+			}
+			if ( text.indexOf(':dead:') > -1 || text.indexOf(':skull:') > -1 ) {
+				msg += msg.length ? ' 💀💀' : '💀💀';
+			}
+			if ( msg.length ) bot.say( message.args[0], msg );
 		}
 	}
 });
