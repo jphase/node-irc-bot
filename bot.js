@@ -894,23 +894,26 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					bot.say( message.args[0], msg );
 					break;
 
-				// Emojis #2
+				// Poop emoji
 				case 'poop':
-					var msg = '💩';
+					var prefix = who ? who + ': ' : '';
+					var msg = prefix + '💩';
 					bot.say( message.args[0], msg );
 					break;
 
-				// Emojis #3
+				// Fart emojis
 				case 'fart':
-					var msg = '💩💨💨💨💨';
+					var prefix = who ? who + ': ' : '';
+					var msg = prefix + '💩💨💨💨💨';
 					bot.say( message.args[0], msg );
 					break;	
 
-				// Trollollolloll 
+				// Trollollolloll
 				case 'trollolloll':
 				case 'trollsong' : 
 				case 'troll' :
-					var msg = 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
+					var prefix = who ? who + ': ' : '';
+					var msg = prefix + 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
 					bot.say( message.args[0], msg );
 					break;					
 					
