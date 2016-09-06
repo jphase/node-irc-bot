@@ -788,6 +788,26 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					bot.say( message.args[0], msg );
 					break;
 
+				// Emojis #2
+				case 'poop':
+					var msg = '💩';
+					bot.say( message.args[0], msg );
+					break;
+
+				// Emojis #3
+				case 'fart':
+					var msg = '💩💨💨💨💨';
+					bot.say( message.args[0], msg );
+					break;	
+
+				// Trollollolloll 
+				case 'trollolloll':
+				case 'trollsong' : 
+				case 'troll' :
+					var msg = 'https://youtu.be/9zYP8_5IBmU?t=1m49s';
+					bot.say( message.args[0], msg );
+					break;					
+					
 				// Ask command
 				case 'ask':
 					var msg = 'Go ahead and ask your question and someone will assist if they are able.';
