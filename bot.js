@@ -804,7 +804,7 @@ bot.addListener( 'message', function( from, to, text, message ) {
 				case 'trollolloll':
 				case 'trollsong' : 
 				case 'troll' :
-					var msg = 'https://youtu.be/9zYP8_5IBmU?t=1m49s';
+					var msg = 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
 					bot.say( message.args[0], msg );
 					break;					
 					
