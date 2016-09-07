@@ -941,20 +941,49 @@ bot.addListener( 'message', function( from, to, text, message ) {
 			// React to parts of their string if it contains certain text
 			var msg = '';
 			var prefix = who ? who + ': ' : '';
-			if ( text.indexOf(':cry:') > -1 ) {
-				msg += msg.length ? ' (╯︵╰,)' : '(╯︵╰,)';
-			}
-			if ( text.indexOf(':party:') > -1 || text.indexOf(':dance:') > -1 || text.indexOf(':boogie:') > -1 ) {
-				msg += msg.length ? ' ┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓' : '┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓';
-			}
-			if ( text.indexOf(':finger:') > -1 || text.indexOf(':fuckyou:') > -1 || text.indexOf(':fu:') > -1 ) {
-				msg += msg.length ? ' ╭∩╮(ಠ_ಠ)╭∩╮' : '╭∩╮(ಠ_ಠ)╭∩╮';
-			}
-			if ( text.indexOf(':poop:') > -1 || text.indexOf(':crap:') > -1 || text.indexOf(':shit:') > -1 ) {
-				msg += msg.length ? ' 💩💩' : '💩💩';
-			}
-			if ( text.indexOf(':dead:') > -1 || text.indexOf(':skull:') > -1 ) {
-				msg += msg.length ? ' 💀💀' : '💀💀';
+			var reactions = text.match( /:(\w+):/g );
+			if ( reactions !== null && reactions.length ) {
+				reactions.forEach( function( value, index, array ) {
+					// Loop through all words encompassed in colons :something: like :this: in the whole string
+					switch ( value ) {
+						case ':cry:':
+							msg += msg.length ? ' (╯︵╰,)' : '(╯︵╰,)';
+							break;
+						case ':party:':
+						case ':dance:':
+						case ':boogie:':
+							msg += msg.length ? ' ┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓' : '┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓';
+							break;
+						case ':fu:':
+						case ':finger:':
+						case ':fuckyou:':
+							msg += msg.length ? ' ╭∩╮(ಠ_ಠ)╭∩╮' : '╭∩╮(ಠ_ಠ)╭∩╮';
+							break;
+						case ':poop:':
+						case ':crap:':
+						case ':shit:':
+							msg += msg.length ? ' 💩💩' : '💩💩';
+							break;
+						case ':dead:':
+						case ':skull:':
+						case ':skulls:':
+							msg += msg.length ? ' 💀💀' : '💀💀';
+							break;
+						case ':troll:':
+							msg += msg.length ? ' https://youtu.be/9zYP8_5IBmU?t=1m47s' : 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
+							break;
+						case ':shade:':
+						case ':shades:':
+							msg += msg.length ? ' 😎😎' : '😎😎';
+							break;
+						case ':ghost:':
+							msg += msg.length ? ' 👻👻' : '👻👻';
+							break;
+						case ':nerd:':
+							msg += msg.length ? ' 🤓🤓' : '🤓🤓';
+							break;
+					}
+				});
 			}
 			if ( msg.length ) bot.say( message.args[0], msg );
 		}
