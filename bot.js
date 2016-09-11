@@ -387,9 +387,37 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					});
 					break;
 
+				// CSS search
+				case 'css':
+					if ( config.debug ) console.log( '[CSS search] for: ' + str );
+					google( str + ' site:https://developer.mozilla.org/en-US/docs/Web/CSS', function ( err, next, links ) {
+						if ( err && config.debug ) console.error( err );
+						// Show the search results
+						bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
+					break;
+
+				// JS search
+				case 'js':
+					if ( config.debug ) console.log( '[JS search] for: ' + str );
+					google( str + ' site:https://developer.mozilla.org/en-US/docs/Web/JavaScript/', function ( err, next, links ) {
+						if ( err && config.debug ) console.error( err );
+						// Show the search results
+						bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
+					break;
+
 				// BAH command
 				case 'bah':
 					var answers = [ 'http://xn--rh8hj8g.ws/bah-bloody.gif', 'http://xn--rh8hj8g.ws/bah-brave.gif' ];
+					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+					var msg = who ? who + ': ' + answer : from + ': ' + answer;
+					bot.say( message.args[0], msg );
+					break;
+
+				// YAY command
+				case 'yay':
+					var answers = [ 'http://xn--rh8hj8g.ws/yay-homer.jpg' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.say( message.args[0], msg );
@@ -856,7 +884,7 @@ bot.addListener( 'message', function( from, to, text, message ) {
 
 				// Hi command
 				case 'hi':
-					var answers = [ 'https://s-media-cache-ak0.pinimg.com/originals/7d/8c/8d/7d8c8d1fd7b01d033dcbad20ca6053a5.jpg', 'https://media.giphy.com/media/8vc2rMUDjhy6Y/giphy.gif', 'https://media.giphy.com/media/JGKwzgpKXVYaY/giphy.gif', 'http://xn--rh8hj8g.ws/hi-picard.gif', 'http://www.hellocreative.com/images/Hello-Funny.gif', 'https://media.giphy.com/media/rcE4NmvORkx9u/giphy.gif' ];
+					var answers = [ 'http://xn--rh8hj8g.ws/hi-queen.gif', 'http://xn--rh8hj8g.ws/hi-goofy.gif', 'http://xn--rh8hj8g.ws/hi-forestgump.gif', 'http://xn--rh8hj8g.ws/hi-picard.gif', 'http://xn--rh8hj8g.ws/hi-ironman.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.say( message.args[0], msg );
@@ -928,10 +956,18 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					bot.say( message.args[0], who ? who + ': ' + str : str );
 					break;
 
+				// WAT command
+				case 'wat':
+					var answers = [ 'http://xn--rh8hj8g.ws/wat-shrunkenface.jpg' ];
+					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+					var msg = who ? who + ': ' + answer : from + ': ' + answer;
+					bot.say( message.args[0], msg );
+					break;
+
 				// WTF command
 				case 'wtf':
 					var answers = [ 'http://xn--rh8hj8g.ws/wtf-baby.png' ];
-					var answer = ( str ? str + ' ' : '' ) + answers[ Math.floor( Math.random() * answers.length ) ];
+					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.say( message.args[0], msg );
 					break;
@@ -941,46 +977,108 @@ bot.addListener( 'message', function( from, to, text, message ) {
 			// React to parts of their string if it contains certain text
 			var msg = '';
 			var prefix = who ? who + ': ' : '';
-			var reactions = text.match( /:(\w+):/g );
+			var reactions = text.match( /(\w+)/g );
 			if ( reactions !== null && reactions.length ) {
 				reactions.forEach( function( value, index, array ) {
 					// Loop through all words encompassed in colons :something: like :this: in the whole string
-					switch ( value ) {
-						case ':cry:':
+					switch ( value.toLowerCase() ) {
+						case 'cry':
+						case ':~(':
 							msg += msg.length ? ' (╯︵╰,)' : '(╯︵╰,)';
 							break;
-						case ':party:':
-						case ':dance:':
-						case ':boogie:':
+						case 'party':
+						case 'dance':
+						case 'boogie':
 							msg += msg.length ? ' ┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓' : '┏(-_-)┛┗(-_-﻿)┓┗(-_-)┛┏(-_-)┓';
 							break;
-						case ':fu:':
-						case ':finger:':
-						case ':fuckyou:':
-							msg += msg.length ? ' ╭∩╮(ಠ_ಠ)╭∩╮' : '╭∩╮(ಠ_ಠ)╭∩╮';
+						case 'fuck':
+						case 'finger':
+							var nextword = reactions[ index + 1 ];
+							if ( value != 'fuck' || ( nextword == 'you' || nextword == 'off' ) ) {
+								msg += msg.length ? ' ╭∩╮(ಠ_ಠ)╭∩╮' : '╭∩╮(ಠ_ಠ)╭∩╮';
+							} else if ( value == 'fuck' && ( nextword == 'this' || nextword == 'life' ) ) {
+								msg += msg.length ? ' (╯°□°）╯︵ ┻━┻' : '(╯°□°）╯︵ ┻━┻';
+							}
 							break;
-						case ':poop:':
-						case ':crap:':
-						case ':shit:':
+						case 'poop':
+						case 'crap':
+						case 'shit':
+						case 'crappy':
+						case 'shitty':
 							msg += msg.length ? ' 💩💩' : '💩💩';
 							break;
-						case ':dead:':
-						case ':skull:':
-						case ':skulls:':
+						case 'dead':
+						case 'skull':
+						case 'skulls':
 							msg += msg.length ? ' 💀💀' : '💀💀';
 							break;
-						case ':troll:':
-							msg += msg.length ? ' https://youtu.be/9zYP8_5IBmU?t=1m47s' : 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
+						case 'troll':
+						case 'trolls':
+						case 'trolling':
+							if ( msg.indexOf('https://youtu.be/9zYP8_5IBmU?t=1m47s') == -1 ) {
+								msg += msg.length ? ' ' : 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
+							}
 							break;
-						case ':shade:':
-						case ':shades:':
+						case 'shade':
+						case 'shades':
 							msg += msg.length ? ' 😎😎' : '😎😎';
 							break;
-						case ':ghost:':
+						case 'ghost':
+						case 'ghosts':
+						case 'halloween':
 							msg += msg.length ? ' 👻👻' : '👻👻';
 							break;
-						case ':nerd:':
+						case 'nerd':
+						case 'nerds':
+						case 'nerdy':
 							msg += msg.length ? ' 🤓🤓' : '🤓🤓';
+							break;
+						case 'bah':
+						case 'frustrated':
+							msg += msg.length ? ' (╯°□°）╯︵ ┻━┻' : '(╯°□°）╯︵ ┻━┻';
+							break;
+						case 'hmm':
+						case 'wonder':
+						case 'thinking':
+							msg += msg.length ? ' 🤔🤔' : '🤔🤔';
+							break;
+						case 'angel':
+						case 'innocent':
+						case 'harmless':
+							msg += msg.length ? ' 😇😇' : '😇😇';
+							break;
+						case 'shrug':
+						case 'shrugs':
+							msg += msg.length ? ' ¯\\_(ツ)_/¯' : '¯\\_(ツ)_/¯';
+							break;
+						case 'yolo':
+							msg += msg.length ? ' Yᵒᵘ Oᶰˡʸ Lᶤᵛᵉ Oᶰᶜᵉ' : 'Yᵒᵘ Oᶰˡʸ Lᶤᵛᵉ Oᶰᶜᵉ';
+							break;
+						case 'hi':
+						case 'waves':
+						case 'hello':
+						case 'greetings':
+							var answers = [ 'http://xn--rh8hj8g.ws/hi-queen.gif', 'http://xn--rh8hj8g.ws/hi-goofy.gif', 'http://xn--rh8hj8g.ws/hi-forestgump.gif', 'http://xn--rh8hj8g.ws/hi-picard.gif', 'http://xn--rh8hj8g.ws/hi-ironman.gif' ];
+							var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+							msg += msg.length ? ' ' + answer : answer;
+							break;
+						case 'bye':
+						case 'goodbye':
+						case 'farewell':
+							var answers = [ 'http://xn--rh8hj8g.ws/bye-jezebel.gif', 'http://xn--rh8hj8g.ws/bye-jezebel.gif', 'http://xn--rh8hj8g.ws/bye-bitch.gif', 'http://xn--rh8hj8g.ws/bye-woody.gif', 'http://xn--rh8hj8g.ws/bye-clarissa.gif', 'http://xn--rh8hj8g.ws/bye-harrypotter.gif', 'http://xn--rh8hj8g.ws/bye-random.gif' ];
+							var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+							msg += msg.length ? ' ' + answer : answer;
+							break;
+						case 'wtf':
+						case 'dafuq':
+							var answers = [ 'http://xn--rh8hj8g.ws/wtf-baby.png' ];
+							var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+							msg += msg.length ? ' ' + answer : answer;
+							break;
+						case 'smh':
+							var answers = [ 'http://xn--rh8hj8g.ws/smh-mjf.png', 'http://xn--rh8hj8g.ws/smh-today.gif', 'http://xn--rh8hj8g.ws/smh-kanye.gif', 'http://xn--rh8hj8g.ws/smh-bbad.gif', 'http://xn--rh8hj8g.ws/smh-drag.gif' ];
+							var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+							msg += msg.length ? ' ' + answer : answer;
 							break;
 					}
 				});
