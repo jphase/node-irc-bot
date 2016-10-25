@@ -934,17 +934,17 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					var prefix = who ? who + ': ' : '';
 					var msg = prefix + '💩💨💨💨💨';
 					bot.say( message.args[0], msg );
-					break;	
+					break;
 
 				// Trollollolloll
 				case 'trollolloll':
-				case 'trollsong' : 
+				case 'trollsong' :
 				case 'troll' :
 					var prefix = who ? who + ': ' : '';
 					var msg = prefix + 'https://youtu.be/9zYP8_5IBmU?t=1m47s';
 					bot.say( message.args[0], msg );
-					break;					
-					
+					break;
+
 				// Ask command
 				case 'ask':
 					var msg = 'Go ahead and ask your question and someone will assist if they are able.';
@@ -1081,6 +1081,23 @@ bot.addListener( 'message', function( from, to, text, message ) {
 							msg += msg.length ? ' ' + answer : answer;
 							break;
 					}
+				});
+			}
+			// bug reporting
+			var bugs = text.match( /(#|(bug\s+)|(https?:\/\/core\.trac\.wordpress\.org\/ticket\/))(\d+)/ig );
+			if ( bugs !== null && bugs.length ) {
+				console.log( bugs );
+				bugs.forEach( function( bug ) {
+					console.log(bug);
+					bug = bug.replace( /(#|(bug\s+)|(https?:\/\/core\.trac\.wordpress\.org\/ticket\/))/i, '' );
+					request( 'https://core.trac.wordpress.org/ticket/' + bug + '?format=rss', function( error, response, body ) {
+						if ( error ) {
+							return;
+						}
+						var title = body.match( /<title>(.*?)<\/title>/i );
+						console.log(title[1]);
+						bot.say(message.args[0], title[1]);
+					});
 				});
 			}
 			if ( msg.length ) bot.say( message.args[0], msg );
