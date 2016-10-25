@@ -18,7 +18,7 @@ var flood = [];
 // Create the bot
 var bot = new irc.Client( config.server, config.name, {
 	// channels: config.channels,
-	// localAddress: config.localAddress,
+	localAddress: config.localAddress,
 	realName: config.realName,
 	autoRejoin: true
 });
@@ -380,10 +380,37 @@ bot.addListener( 'message', function( from, to, text, message ) {
 				case 'c':
 				case 'codex':
 					if ( config.debug ) console.log( '[Codex search] for: ' + str );
-					google( str + ' site:codex.wordpress.org OR site:developer.wordpress.org', function ( err, next, links ) {
+
+					// // Scrape the site for contents from selector
+					// var site = 'http://google.com/search?q=' + encodeURIComponent( str + ' site:wordpress.org inurl:("codex.wordpress.org"|"developer.wordpress.org")' );
+					// request( site, function( error, response, body ) {
+					// 	if ( ! error) {
+					// 		// Load jsdom for DOM parsing
+					// 		jsdom.env(
+					// 			body,
+					// 			[ 'http://code.jquery.com/jquery-2.2.3.min.js' ],
+					// 			function( err, window ) {
+					// 				if ( err ) console.log( 'err:', err );
+					// 				var $ = window.jQuery;
+					// 				console.log($('#ires .g:first .kv'));
+					// 				var msg = $('#ires .g:first .kv').text();
+					// 				bot.say( message.args[0], who ? who + ': ' + msg : msg );
+					// 			}
+					// 		);
+					// 	} else {
+					// 		console.log( error );
+					// 	}
+					// });
+
+
+					google( str + ' site:wordpress.org inurl:("codex.wordpress.org"|"developer.wordpress.org")', function ( err, next, links ) {
 						if ( err && config.debug ) console.error( err );
 						// Show the search results
-						bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						if ( links && links[0].hasOwnProperty('link') ) {
+							bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						} else {
+							bot.say( to, from + ': weird... your search for: "' + str + ' site:wordpress.org inurl:("codex.wordpress.org"|"developer.wordpress.org")" yielded this: ' + JSON.stringify( links ) );
+						}
 					});
 					break;
 
@@ -445,7 +472,7 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					google( str, function ( err, next, links ) {
 						if ( err && config.debug ) console.error( err );
 						// Show the search results
-						if ( links.length ) {
+						if ( links && links[0].hasOwnProperty('link') ) {
 							var msg = who ? who + ': ' + links[0].link : from + ': ' + links[0].link;
 						} else {
 							var msg = who ? who + ': no Google results found for "' + str + '"' : from + ': no Google results found for "' + str + '"';
@@ -583,7 +610,12 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					google( str + ' site:wpseek.com', function ( err, next, links ) {
 						if ( err && config.debug ) console.error( err );
 						// Show the search results
-						bot.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						if ( links && links[0].hasOwnProperty('link') ) {
+							var msg = links[0].link;
+						} else {
+							var msg = 'weird... I had troubles getting a link for "' + str + ' site:wpseek.com"';
+						}
+						bot.say( to, who ? who + ': ' + msg : from + ': ' + msg );
 					});
 					break;
 
@@ -857,6 +889,14 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					bot.say( message.args[0], msg );
 					break;
 
+				// Chill command
+				case 'calm':
+				case 'chill':
+					var prefix = who ? who + ': ' : '';
+					var msg = prefix + '┬──┬ ノ(゜-゜ノ)';
+					bot.say( message.args[0], msg );
+					break;
+
 				// Shrug command
 				case 'shrug':
 					var prefix = who ? who + ': ' : '';
@@ -912,7 +952,7 @@ bot.addListener( 'message', function( from, to, text, message ) {
 				// Finger command
 				case 'finger':
 					var prefix = who ? who + ': ' : '';
-					var msg = prefix + '╭∩╮(ಠ_ಠ)╭∩╮';
+					var msg = prefix + '╭∩╮（︶︿︶）╭∩╮';
 					bot.say( message.args[0], msg );
 					break;
 
@@ -972,6 +1012,14 @@ bot.addListener( 'message', function( from, to, text, message ) {
 					bot.say( message.args[0], msg );
 					break;
 
+				// Yas command
+				case 'yas':
+					var answers = [ 'http://xn--rh8hj8g.ws/yas-werk.gif' ];
+					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+					var msg = who ? who + ': ' + answer : from + ': ' + answer;
+					bot.say( message.args[0], msg );
+					break;
+
 			}
 		} else {
 			// React to parts of their string if it contains certain text
@@ -980,10 +1028,15 @@ bot.addListener( 'message', function( from, to, text, message ) {
 			var reactions = text.match( /(\w+)/g );
 			if ( reactions !== null && reactions.length ) {
 				reactions.forEach( function( value, index, array ) {
+					// In case we need to check the next word too
+					var nextword = reactions[ index + 1 ];
 					// Loop through all words encompassed in colons :something: like :this: in the whole string
 					switch ( value.toLowerCase() ) {
 						case 'cry':
+						case 'tear':
+						case 'tears':
 						case ':~(':
+						case ':(':
 							msg += msg.length ? ' (╯︵╰,)' : '(╯︵╰,)';
 							break;
 						case 'party':
@@ -993,11 +1046,12 @@ bot.addListener( 'message', function( from, to, text, message ) {
 							break;
 						case 'fuck':
 						case 'finger':
-							var nextword = reactions[ index + 1 ];
 							if ( value != 'fuck' || ( nextword == 'you' || nextword == 'off' ) ) {
-								msg += msg.length ? ' ╭∩╮(ಠ_ಠ)╭∩╮' : '╭∩╮(ಠ_ಠ)╭∩╮';
+								msg += msg.length ? ' ╭∩╮（︶︿︶）╭∩╮' : '╭∩╮（︶︿︶）╭∩╮';
 							} else if ( value == 'fuck' && ( nextword == 'this' || nextword == 'life' ) ) {
 								msg += msg.length ? ' (╯°□°）╯︵ ┻━┻' : '(╯°□°）╯︵ ┻━┻';
+							} else if ( value == 'fuck' ) {
+								msg += msg.length ? ' 🍆🍆' : '🍆🍆';
 							}
 							break;
 						case 'poop':
@@ -1037,6 +1091,12 @@ bot.addListener( 'message', function( from, to, text, message ) {
 						case 'frustrated':
 							msg += msg.length ? ' (╯°□°）╯︵ ┻━┻' : '(╯°□°）╯︵ ┻━┻';
 							break;
+						case 'chill':
+						case 'calm':
+							if ( ( value == 'calm' && nextword == 'down' ) || ( value == 'chill' && nextword == 'out' ) || value == 'chill' ) {
+								msg += msg.length ? ' ┬──┬ ノ(゜-゜ノ)' : '┬──┬ ノ(゜-゜ノ)';
+							}
+							break;
 						case 'hmm':
 						case 'wonder':
 						case 'thinking':
@@ -1072,6 +1132,12 @@ bot.addListener( 'message', function( from, to, text, message ) {
 						case 'wtf':
 						case 'dafuq':
 							var answers = [ 'http://xn--rh8hj8g.ws/wtf-baby.png' ];
+							var answer = answers[ Math.floor( Math.random() * answers.length ) ];
+							msg += msg.length ? ' ' + answer : answer;
+							break;
+						case 'yas':
+						case 'werk':
+							var answers = [ 'http://xn--rh8hj8g.ws/yas-werk.gif' ];
 							var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 							msg += msg.length ? ' ' + answer : answer;
 							break;
