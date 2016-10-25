@@ -1152,17 +1152,17 @@ bot.addListener( 'message', function( from, to, text, message ) {
 			// bug reporting
 			var bugs = text.match( /(#|(bug\s+)|(https?:\/\/core\.trac\.wordpress\.org\/ticket\/))(\d+)/ig );
 			if ( bugs !== null && bugs.length ) {
-				console.log( bugs );
+				if ( config.debug ) console.log( bugs );
 				bugs.forEach( function( bug ) {
-					console.log(bug);
+					if ( config.debug ) console.log(bug);
 					bug = bug.replace( /(#|(bug\s+)|(https?:\/\/core\.trac\.wordpress\.org\/ticket\/))/i, '' );
 					request( 'https://core.trac.wordpress.org/ticket/' + bug + '?format=rss', function( error, response, body ) {
 						if ( error ) {
 							return;
 						}
 						var title = body.match( /<title>(.*?)<\/title>/i );
-						console.log(title[1]);
-						bot.say(message.args[0], title[1]);
+						if ( config.debug ) console.log( title[1] );
+						bot.say( message.args[0], title[1] );
 					});
 				});
 			}
