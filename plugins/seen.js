@@ -65,3 +65,38 @@ module.exports.commands = [
 		}
 	}
 ];
+
+module.exports.listen = function(bot) {
+	bot.addListener('part', function(channel, who) {
+		// Add parting user to the seen array
+		seen.push({
+			event: 'part',
+			nick: who,
+			channel: channel,
+			time: moment().tz( 'America/New_York' ).format( 'MMMM Do YYYY, h:mm:ss a z' )
+		});
+	});
+
+	bot.addListener( 'quit', function( nick, reason, channels, message ) {
+		// Add parting user to the seen array
+		seen.push({
+			event: 'quit',
+			nick: nick,
+			channel: channels,
+			reason: reason,
+			message: message,
+			time: moment().tz( 'America/New_York' ).format( 'MMMM Do YYYY, h:mm:ss a z' )
+		});
+	});
+
+	bot.addListener( 'nick', function ( oldnick, newnick, channels, message ) {
+		seen.push({
+			event: 'nick',
+			nick: oldnick,
+			newnick: newnick,
+			channel: channels,
+			message: message,
+			time: moment().tz( 'America/New_York' ).format( 'MMMM Do YYYY, h:mm:ss a z' )
+		});
+	});
+}
