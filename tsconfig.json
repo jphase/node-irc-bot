@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es5",
+		"moduleResolution": "Node",
+		"allowJs": true,
+		"sourceMap": true,
+		"lib": [
+			"dom",
+			"es2015",
+			"es5"
+		]
+	}
+}
