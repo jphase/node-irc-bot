@@ -1,5 +1,5 @@
 /*
- *	This file handles 'registered' events from the irc client
+ *	This file handles 'error' events from the irc client
  */
 
 // Includes

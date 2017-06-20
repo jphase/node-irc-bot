@@ -1,5 +1,5 @@
 /*
- *	This file handles 'join' events from the irc client
+ *	This file handles 'part' events from the irc client
  */
 
 // Includes

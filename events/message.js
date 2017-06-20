@@ -1,5 +1,5 @@
 /*
- *	This file handles 'nick' events from the irc client
+ *	This file handles 'message' events from the irc client
  */
 
 // Includes
