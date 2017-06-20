@@ -7,13 +7,14 @@ var bot = require( '../bot' );
 
 // Nick change events
 bot.client.addListener( 'nick', function ( oldnick, newnick, channels, message ) {
+	if ( bot.config.debug ) console.log( '!!Nick Handler!!' );
 	// Update seen array if necessary
-	bot.seen.push({
+	bot.seen.add({
 		event: 'nick',
 		nick: oldnick,
 		newnick: newnick,
 		channel: channels,
 		message: message,
-		time: moment().tz( 'America/New_York' ).format( 'MMMM Do YYYY, h:mm:ss a z' )
+		time: bot.moment().tz( 'America/New_York' ).format( 'MMMM Do YYYY, h:mm:ss a z' )
 	});
 });

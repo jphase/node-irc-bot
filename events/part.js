@@ -8,11 +8,11 @@ var bot = require( '../bot' );
 // Part events
 bot.client.addListener( 'part', function( channel, who ) {
 	if ( bot.config.debug ) {
-		console.log( 'Part Handler!!' );
+		console.log( '!!Part Handler!!' );
 		console.log( channel );
 	}
 	// Add parting user to the seen array
-	bot.seen.push({
+	bot.seen.add({
 		event: 'part',
 		nick: who,
 		channel: channel,

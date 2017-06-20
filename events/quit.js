@@ -9,7 +9,7 @@ var bot = require( '../bot' );
 bot.client.addListener( 'quit', function( nick, reason, channels, message ) {
 	if ( config.debug ) console.log( message );
 	// Add parting user to the seen array
-	bot.seen.push({
+	bot.seen.add({
 		event: 'quit',
 		nick: nick,
 		channel: channels,

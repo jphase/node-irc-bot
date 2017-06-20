@@ -127,7 +127,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					var inbox = [];
 
 					// Loop through each message and build one big message to deliver to the user
-					tell.forEach( function( value, index, array ) {
+					bot.tell.list().forEach( function( value, index, array ) {
 						if ( value.from == from && told.length < 4 ) {
 							if ( bot.config.debug ) console.log( 'Delivering .tell message #' + index + ' to ' + from );
 							msg = '[' + value.from + ' ' + value.date + ']: ' + value.message;
@@ -157,7 +157,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					// Remove the messages that have been delivered
 					if ( told.length ) {
 						told.forEach( function( value, index, array ) {
-							tell.splice( value, 1 );
+							bot.tell.list().splice( value, 1 );
 						});
 					}
 					break;
@@ -404,52 +404,20 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				// Seen command
 				case 'seen':
 					if ( from != str ) {
-						var none = true;
 						if ( bot.config.debug ) {
 							console.log( '[Seen search] for: ' + str );
-							console.log( bot.chans );
+							console.log( bot.client.chans );
 							console.log( 'search through:' );
 							console.log( bot.config.channels );
 						}
-						// Check channels first
-						bot.config.channels.forEach( function( pvalue, pindex, parray ) {
-							// Normalize the case of each user for case insensitive checking
-							var chanusers = [];
-							for ( var user in bot.chans[ pvalue ].users ) {
-								chanusers.push( user.toLowerCase() );
-							}
 
-							// Loop through case normalized usernames
-							for ( var user in bot.chans[ pvalue ].users ) {
-								if ( none && bot.chans[ pvalue ].users.hasOwnProperty( str ) ) {
-									bot.client.say( to, who ? who + ': ' + str + ' is currently in ' + pvalue : from + ': ' + str + ' is currently in ' + pvalue );
-									none = false;
-								}
-							}
-						});
-						// search through seen array
-						seen.forEach( function( value, index, array ) {
-							if ( value.nick == str ) {
-								// Setup the seen message
-								var msg = 'Last seen ' + value.nick + ' ';
-								var time = ' on ' + value.time;
-								switch ( value.event ) {
-									case 'nick':
-										msg += 'changing their nick to ' + value.newnick + time;
-										break;
-									case 'part':
-										msg += 'parting ' + value.channel + time;
-										if ( value.message ) msg += ' with the message: ' + value.message;
-										break;
-									case 'quit':
-										msg += 'quitting IRC with the message: "' + value.reason + '"' + time;
-										break;
-								}
-								bot.client.say( to, msg );
-								none = false;
-							}
-						});
-						if ( none ) bot.client.say( to, who ? who + ': ' + 'I haven\'t seen ' + str : from + ': ' + 'I haven\'t seen ' + str );
+						// Search for the user in the channels the bot is currently in
+						var seen = bot.seen.search( str, bot.client.chans );
+						var unseen = who ? who + ': ' + 'I haven\'t seen ' + str : from + ': I haven\'t seen ' + str;
+						var seen = seen ? seen : unseen;
+
+						// Deliver results
+						bot.client.say( to, seen );
 					} else {
 						bot.client.say( to, 'That\'s hilarious ' + from + '...' );
 					}
@@ -463,63 +431,26 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					bot.client.say( message.args[0], msg );
 					break;
 
-				// Spooge command
-				case 'spooge':
-					if ( who ) {
-						var msgs = [ '8=👊=D💦', '        💦', '         💦', '        💦💦' ];
-						var msg = '';
-						// Top line
-						for ( var i = 0; i < who.length + 3; i++ ) {
-							msg += '💦';
-						}
-						// Push onto array
-						msgs.push( msg );
-						msg = '💦';
-						// Spaces before name
-						for ( var i = 0; i < ( who.length + 4 ) / 2; i++ ) {
-							msg += ' ';
-						}
-						msg += who;
-						// Spaces after name
-						for ( var i = 0; i < ( who.length + 4 ) / 2; i++ ) {
-							msg += ' ';
-						}
-						msg += '💦';
-						// Push onto array
-						msgs.push( msg );
-						msg = '';
-						// Bottom line
-						for ( var i = 0; i < who.length + 3; i++ ) {
-							msg += '💦';
-						}
-						msgs.push( msg );
-						// Send message
-						msgs.forEach( function( value, index, array ) {
-							bot.client.say( message.args[0], value );
-						});
-					}
-					break;
-
 				// Tell command
 				case 'tell':
 					// Make sure their message is setup correctly
 					var sendto = str.split(' ')[0];
 					// Add .tell message to the tell array
 					if ( bot.config.debug ) console.log( '[Tell ' + sendto + '] ' + str  );
-					if ( tell.length ) {
+					if ( bot.tell.list().length ) {
 						var already = false;
-						tell.forEach( function( value, index, array ) {
+						bot.tell.list().forEach( function( value, index, array ) {
 							if ( value.from == from && value.message == str ) {
 								already = true;
 							}
 						});
 						if ( ! already ) {
 							msg = 'I\'ll deliver your message to ' + sendto + ' the next time they join.';
-							tell.push({ from: from, message: str.replace( sendto + ' ', '' ), date: bot.moment().tz( 'America/New_York' ).format( 'M/DD/YY h:mm:ssa z' ) });
+							bot.tell.add( from, sendto, str.replace( sendto + ' ', '' ) );
 						}
 					} else {
 						msg = 'I\'ll deliver your message to ' + sendto + ' the next time they join.';
-						tell.push({ from: from, message: str.replace( sendto + ' ', '' ), date: bot.moment().tz( 'America/New_York' ).format( 'M/DD/YY h:mm:ssa z' ) });
+						bot.tell.add( from, sendto, str.replace( sendto + ' ', '' ) );
 					}
 					var msg = who ? who + ': ' + msg : from + ': ' + msg;
 					bot.client.say( message.args[0], msg );
@@ -689,12 +620,6 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				// Emojis #1
 				case 'emojis':
 					var msg = '😀😬😁😂😃😄😅😆😌😋🙃🙂😊😉😇😍😘😗😙😚😜😝😛😑😐😶😏🤗😎🤓🤑😒🙄🤔😳😞😟😠😡😩😫😖😣☹🙁😕😔😤😮😱😨😰😯😦😧😢😥😪😓😭😵😲🤐👿😈💩💤😴🤕🤒😷👹👺💀👻👽🤖😺😸🙌😾😿🙀😽😼😻😹🙌🏻🙌🏼🙌🏽🙌🏾🙌🏿👏👏🏻👏🏼👏🏽👏🏾👏🏿';
-					bot.client.say( message.args[0], msg );
-					break;
-
-				// Emojis #2
-				case 'emojis+':
-					var msg = '';
 					bot.client.say( message.args[0], msg );
 					break;
 
