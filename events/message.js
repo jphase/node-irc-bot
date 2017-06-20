@@ -93,29 +93,34 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					if ( isAdmin ) {
 						// Setup site and selector
 						var selector = str.match( /'(.*)'/ );
-						selector = selector[1];
-						var site = str.split( ' ' );
-						site = site[0];
+						if ( selector != null ) {
+							console.log( selector );
+							selector = selector[1];
+							var site = str.split( ' ' );
+							site = site[0];
 
-						// Scrape the site for contents from selector
-						request( site, function( error, response, body ) {
-							if ( ! error) {
-								// Load bot.jsdom for DOM parsing
-								bot.jsdom.env(
-									body,
-									[ 'http://code.jquery.com/jquery-2.2.3.min.js' ],
-									function( err, window ) {
-										if ( err ) console.log( 'err:', err );
-										var $ = window.jQuery;
-										console.log( 'body:', $('body').html() );
-										var msg = $( selector ).text();
-										bot.client.say( message.args[0], who ? who + ': ' + msg : msg );
-									}
-								);
-							} else {
-								console.log( error );
-							}
-						});
+							// Scrape the site for contents from selector
+							request( site, function( error, response, body ) {
+								if ( ! error) {
+									// Load bot.jsdom for DOM parsing
+									bot.dom.env(
+										body,
+										[ 'http://code.jquery.com/jquery-2.2.3.min.js' ],
+										function( err, window ) {
+											if ( err ) console.log( 'err:', err );
+											var $ = window.jQuery;
+											console.log( 'body:', $('body').html() );
+											var msg = $( selector ).text();
+											bot.client.say( message.args[0], who ? who + ': ' + msg : msg );
+										}
+									);
+								} else {
+									console.log( error );
+								}
+							});
+						} else {
+							console.log( selector )
+						}
 					}
 					break;
 
