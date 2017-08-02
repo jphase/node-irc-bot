@@ -8,7 +8,7 @@ var bot = require( '../bot' );
 // Message events
 bot.client.addListener( 'message', function( from, to, text, message ) {
 	// Debug incoming messages
-	if ( false && bot.config.debug ) {
+	if ( bot.config.debug ) {
 		console.log( '============ From ============' );
 		console.log( from );
 		console.log( '============  To  ============' );
@@ -132,13 +132,6 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					}
 					break;
 
-				// Watch
-				case 'ip':
-					if ( isAdmin ) {
-						console.log( bot.client );
-					}
-					break;
-
 				// Inbox
 				case 'inbox':
 					// Check for pending .tell commands for this user
@@ -238,16 +231,6 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					}
 					break;
 
-				// Op
-				case 'op':
-					if ( isAdmin ) {
-						// Op the user
-						var nick = str.length ? str : from;
-						if ( bot.config.debug ) console.log( 'OP ' + message.args[0] + ' ' + nick + ' ' + msg );
-						bot.client.send( 'OP ' + message.args[0] + ' ' + nick );
-					}
-					break;
-
 				// Kick
 				case 'kick':
 					if ( isAdmin ) {
@@ -277,12 +260,23 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				case 'c':
 				case 'codex':
 					if ( bot.config.debug ) console.log( '[Codex search] for: ' + str );
-					bot.search( ['https://codex.wordpress.org', 'https://developer.wordpress.org'], message.args[0], who, from, str );
+					bot.google( str + ' site:codex.wordpress.org OR site:developer.wordpress.org', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						var msg = who ? who + ': ' : from + ': ';
+						if ( links != null && links[0].link ) {
+							msg = msg + ': ' + links[0].link;
+						} else {
+							console.log( links );
+							msg = msg + 'no results found for "' + str + '" site:codex.wordpress.org OR site:developer.wordpress.org';
+						}
+						bot.client.say( to, msg );
+					});
 					break;
 
 				// BAH command
 				case 'bah':
-					var answers = [ 'http://robido.com/img/bah-bloody.gif', 'http://robido.com/img/bah-brave.gif' ];
+					var answers = [ 'http://xn--rh8hj8g.ws/bah-bloody.gif', 'http://xn--rh8hj8g.ws/bah-brave.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -290,7 +284,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 
 				// Fine command
 				case 'fine':
-					var answers = [ 'http://robido.com/img/fine-wednesday.gif' ];
+					var answers = [ 'http://xn--rh8hj8g.ws/fine-wednesday.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -298,7 +292,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 
 				// FML command
 				case 'fml':
-					var answers = [ 'http://robido.com/img/fml-monkey.jpg', 'http://robido.com/img/fml-baby.png', 'http://robido.com/img/fml-horse.png', 'http://robido.com/img/fml.jpg', 'http://robido.com/img/fml-smurf.jpg', 'http://robido.com/img/fml-stupid.png', 'http://robido.com/img/fml-spongebob.png', 'http://robido.com/img/fml-flife.jpg' ];
+					var answers = [ 'http://s2.quickmeme.com/img/03/0353203cbc2e18150f8c7f45cb7d64efa57d8ac5bd1059add3576fc94ca702f2.jpg', 'http://i3.kym-cdn.com/photos/images/facebook/000/089/506/128989967490130539.jpg', 'http://img.memecdn.com/fml_o_577538.jpg', 'http://img.memecdn.com/FML-horse_o_141347.jpg', 'http://i0.kym-cdn.com/entries/icons/facebook/000/004/706/FML.jpg', 'http://don.citarella.net/wp-content/uploads/2012/05/sml.jpg', 'https://cdn.meme.am/instances/500x/55087958.jpg', 'https://cdn.meme.am/instances/500x/10377021.jpg', 'http://i2.kym-cdn.com/photos/images/list/000/478/993/5b1.jpg' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -307,44 +301,62 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				// Google search
 				case 'g':
 					if ( bot.config.debug ) console.log( '[Google search] for: ' + str );
-					var results = bot.search( '', message.args[0], who, from, str );
-					console.log(results);
-
-					// bot.google( str, function ( err, next, links ) {
-					// 	if ( err && bot.config.debug ) console.error( err );
-					// 	// Show the search results
-					// 	if ( links.length ) {
-					// 		var msg = who ? who + ': ' + links[0].link : from + ': ' + links[0].link;
-					// 	} else {
-					// 		var msg = who ? who + ': no Google results found for "' + str + '"' : from + ': no Google results found for "' + str + '"';
-					// 	}
-					// 	bot.client.say( to, msg );
-					// });
+					bot.google( str, function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						if ( links.length ) {
+							var msg = who ? who + ': ' + links[0].link : from + ': ' + links[0].link;
+						} else {
+							var msg = who ? who + ': no Google results found for "' + str + '"' : from + ': no Google results found for "' + str + '"';
+						}
+						bot.client.say( to, msg );
+					});
 					break;
 
 				// Hookr.io search
 				case 'h':
 				case 'hookr':
 					if ( bot.config.debug ) console.log( '[Hookr search] for: ' + str );
-					bot.search( 'hookr.io', message.args[0], who, from, str );
+					bot.google( str + ' site:hookr.io', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
 					break;
 
 				// JetPack search
 				case 'jetpack':
 					if ( bot.config.debug ) console.log( '[JetPack search] for: ' + str );
-					bot.search( 'developer.jetpack.com', message.args[0], who, from, str );
+					bot.google( str + ' site:developer.jetpack.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						if ( links != null && links[0].link ) {
+							var msg = who ? who + ': no results found for "' + str + '" on developer.jetpack.com' : from + ': no results found for "' + str + '" on developer.jetpack.com';
+						} else {
+							var msg = who ? who + ': ' + links[0].link : from + ': ' + links[0].link;
+						}
+						bot.client.say( to, msg );
+					});
 					break;
 
 				// jQuery API search
 				case 'jquery':
 					if ( bot.config.debug ) console.log( '[jQuery API search] for: ' + str );
-					bot.search( 'api.jquery.com', message.args[0], who, from, str );
+					bot.google( str + ' site:api.jquery.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
 					break;
 
 				// jQuery UI API search
 				case 'jqueryui':
 					if ( bot.config.debug ) console.log( '[jQuery UI API search] for: ' + str );
-					bot.search( 'jqueryui.com', message.args[0], who, from, str );
+					bot.google( str + ' site:jqueryui.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
 					break;
 
 				// lmgtfy.com search
@@ -359,34 +371,65 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				// Plugin search
 				case 'p':
 					if ( bot.config.debug ) console.log( '[Plugin search] for: ' + str );
-					bot.search( 'wordpress.org/plugins', message.args[0], who, from, str );
+					bot.google( str + ' wordpress plugin site:https://wordpress.org/plugins', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						if ( bot.config.debug ) console.log( links );
+						// Show the search results
+						if ( links.length ) {
+							bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						}
+					});
 					break;
 
 				// PHP.net search
 				case 'php':
 					if ( bot.config.debug ) console.log( '[PHP search] for: ' + str );
-					bot.search( 'php.net', message.args[0], who, from, str );
+					bot.google( str + ' site:http://php.net', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						if ( bot.config.debug ) console.log( links );
+						// Show the search results
+						if ( links.length ) {
+							bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						}
+					});
 					break;
 
 				// wpseek.com search
 				case 'wps':
 				case 'wpseek':
 					if ( bot.config.debug ) console.log( '[wpseek.com search] for: ' + str );
-					bot.search( 'wpseek.com', message.args[0], who, from, str );
+					bot.google( str + ' site:wpseek.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
 					break;
 
 				// soundcloud.com search
 				case 'sc':
 				case 'soundcloud':
 					if ( bot.config.debug ) console.log( '[soundcloud.com search] for: ' + str );
-					bot.search( 'soundcloud.com', message.args[0], who, from, str );
+					bot.google( str + ' site:soundcloud.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+					});
 					break;
 
 				// spotify.com search
 				case 'sp':
 				case 'spotify':
 					if ( bot.config.debug ) console.log( '[spotify.com search] for: ' + str );
-					bot.search( 'spotify.com', message.args[0], who, from, str );
+					bot.google( str + ' site:spotify.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						// Show the search results
+						if ( links != null && links[0].link ) {
+							bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						} else {
+							var msg = ': weird... your search for: "' + str + ' site:spotify.com" yielded this: ' + JSON.stringify( links );
+							bot.client.say( to, who ? who + ': ' + msg : from + ': ' + msg );
+						}
+					});
 					break;
 
 				// YouTube search
@@ -394,39 +437,44 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				case 'yt':
 				case 'youtube':
 					if ( bot.config.debug ) console.log( '[YouTube search] for: ' + str );
-					bot.search( 'youtube.com', message.args[0], who, from, str );
+					bot.google( str + ' site:youtube.com', function ( err, next, links ) {
+						if ( err && bot.config.debug ) console.error( err );
+						if ( bot.config.debug ) console.log( links );
+						// Show the search results
+						if ( links != null && links[0].link ) {
+							bot.client.say( to, who ? who + ': ' + links[0].link : from + ': ' + links[0].link );
+						} else {
+							var msg = ': weird... your search for: "' + str + ' site:youtube.com" yielded this: ' + JSON.stringify( links );
+							bot.client.say( to, who ? who + ': ' + msg : from + ': ' + msg );
+						}
+					});
 					break;
 
 				// Seen command
 				case 'seen':
 					if ( from != str ) {
+						if ( bot.config.debug ) {
+							console.log( '[Seen search] for: ' + str );
+							console.log( bot.client.chans );
+							console.log( 'search through:' );
+							console.log( bot.config.channels );
+						}
+
 						// Search for the user in the channels the bot is currently in
-						bot.seen.search( str, message.args[0], who, from );
+						var seen = bot.seen.search( str, bot.client.chans );
+						var unseen = who ? who + ': ' + 'I haven\'t seen ' + str : from + ': I haven\'t seen ' + str;
+						var seen = seen ? seen : unseen;
+
+						// Deliver results
+						bot.client.say( to, seen );
 					} else {
-						// Laugh at the user
 						bot.client.say( to, 'That\'s hilarious ' + from + '...' );
 					}
 					break;
 
 				// SMH command
 				case 'smh':
-					var answers = [ 'http://robido.com/img/smh-oprah.gif', 'http://robido.com/img/smh-office.gif', 'http://robido.com/img/smh-mjf.png', 'http://robido.com/img/smh-today.gif', 'http://robido.com/img/smh-kanye.gif', 'http://robido.com/img/smh-bbad.gif', 'http://robido.com/img/smh-drag.gif' ];
-					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
-					var msg = who ? who + ': ' + answer : from + ': ' + answer;
-					bot.client.say( message.args[0], msg );
-					break;
-
-				// Shade command
-				case 'shade':
-					var answers = [ 'http://robido.com/img/shade-allstars.gif', 'http://robido.com/img/shade-city.gif', 'http://robido.com/img/shade-drag.gif' ];
-					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
-					var msg = who ? who + ': ' + answer : from + ': ' + answer;
-					bot.client.say( message.args[0], msg );
-					break;
-
-				// Shame command
-				case 'shame':
-					var answers = [ 'http://robido.com/img/shame.png', 'http://robido.com/img/shame-dog.gif' ];
+					var answers = [ 'http://xn--rh8hj8g.ws/smh-mjf.png', 'http://xn--rh8hj8g.ws/smh-today.gif', 'http://xn--rh8hj8g.ws/smh-kanye.gif', 'http://xn--rh8hj8g.ws/smh-bbad.gif', 'http://xn--rh8hj8g.ws/smh-drag.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -540,14 +588,6 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 					bot.client.say( message.args[0], msg );
 					break;
 
-				// Meh command
-				case 'meh':
-				case 'glare':
-					var prefix = who ? who + ': ' : '';
-					var msg = prefix + 'ಠ_ಠ';
-					bot.client.say( message.args[0], msg );
-					break;
-
 				// Blame command
 				case 'blame':
 					if ( str == bot.nick ) {
@@ -588,7 +628,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 				case 'pff':
 				case 'pft':
 				case 'pf':
-					var answers = [ 'http://robido.com/img/pff-baby.jpg', 'http://robido.com/img/pff-petergriffin.jpg', 'http://robido.com/img/pfft.jpg', 'http://robido.com/img/yaobama.png', 'http://robido.com/img/pff-dog.jpg' ];
+					var answers = [ 'https://s-media-cache-ak0.pinimg.com/736x/a9/26/8f/a9268f451c95945e928121cd91c41281.jpg', 'http://reactiongif.org/wp-content/uploads/GIF/2014/08/GIF-bfd-big-deal-dwight-meh-sarcastic-the-office-uncaring-whatever-GIF.gif', 'https://static1.fjcdn.com/thumbnails/comments/Pfft+that+horrible+tattoo+does+_5e04cac8f2e8f5a827be0b3123a888b1.png', 'http://data.whicdn.com/images/196440384/large.jpg', 'https://coydavidson.files.wordpress.com/2012/06/pfft.jpg', 'https://tromoticons.files.wordpress.com/2012/11/yao-ming-pff.png', 'https://cdn.meme.am/instances/500x/50075843.jpg' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -596,7 +636,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 
 				// Hi command
 				case 'hi':
-					var answers = [ 'http://robido.com/img/hi-queen.gif', 'http://robido.com/img/hi-goofy.gif', 'https://robido.com/img/hi-forest.gif', 'http://robido.com/img/hi-picard.gif', 'http://robido.com/img/hi-ironman.gif', 'http://robido.com/img/hi-whale.gif' ];
+					var answers = [ 'https://s-media-cache-ak0.pinimg.com/originals/7d/8c/8d/7d8c8d1fd7b01d033dcbad20ca6053a5.jpg', 'https://media.giphy.com/media/8vc2rMUDjhy6Y/giphy.gif', 'https://media.giphy.com/media/JGKwzgpKXVYaY/giphy.gif', 'http://p.fod4.com/p/media/15622856b6/YTKd82zSAuXVKbCHrGj5_Star%20Trek%20Patrick%20Stewart.gif', 'http://www.hellocreative.com/images/Hello-Funny.gif', 'https://media.giphy.com/media/rcE4NmvORkx9u/giphy.gif', 'http://p.fod4.com/p/media/15622856b6/blJcJsQKQjGARx7rLGQg_Whale%20Hello.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -604,7 +644,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 
 				// Bye command
 				case 'bye':
-					var answers = [ 'http://robido.com/img/bye-jezebel.gif', 'http://robido.com/img/bye-picard.gif', 'http://robido.com/img/bye-bitch.gif', 'http://robido.com/img/bye-woody.gif', 'http://robido.com/img/bye-clarissa.gif', 'http://robido.com/img/bye-harrypotter.gif', 'http://robido.com/img/bye-random.gif' ];
+					var answers = [ 'https://janeaustenrunsmylife.files.wordpress.com/2014/02/jezebel_buh-bye_wave-goodbye_brilliantsunrise-pb.gif', 'http://p.fod4.com/p/media/15622856b6/YTKd82zSAuXVKbCHrGj5_Star%20Trek%20Patrick%20Stewart.gif', 'http://25.media.tumblr.com/tumblr_lt3cwzIDoU1qipyqco1_500.gif', 'http://media3.popsugar-assets.com/files/thumbor/Kq9kVeZDktjN26PTW3rBFPtYX8A/fit-in/2048xorig/filters:format_auto.!!.:strip_icc.!!./2014/11/06/317/n/1922283/728c12978f2d92be_tumblr_mwji67R3w71sj1ltqo1_500/i/When-Woody-says-goodbye-you-SOBBED.gif', 'http://p.fod4.com/p/media/15622856b6/Qcz8AXFORCS4NkpouQiT_Clarissa.gif', 'http://lovelace-media.imgix.net/uploads/615/8cf94510-9dba-0133-a027-0e7c926a42af.gif', 'http://i.imgur.com/OZNYKGY.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
