@@ -418,7 +418,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 
 				// Shade command
 				case 'shade':
-					var answers = [ 'http://robido.com/img/shade-allstars.gif', 'http://robido.com/img/shade-city.gif', 'http://robido.com/img/shade-drag.gif' ];
+					var answers = [ 'http://robido.com/img/shade-allstars.gif', 'http://robido.com/img/shade-city.gif' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
@@ -426,7 +426,7 @@ bot.client.addListener( 'message', function( from, to, text, message ) {
 
 				// Shame command
 				case 'shame':
-					var answers = [ 'http://robido.com/img/shame.png', 'http://robido.com/img/shame-dog.gif' ];
+					var answers = [ 'http://robido.com/img/shame.png' ];
 					var answer = answers[ Math.floor( Math.random() * answers.length ) ];
 					var msg = who ? who + ': ' + answer : from + ': ' + answer;
 					bot.client.say( message.args[0], msg );
